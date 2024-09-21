@@ -17,6 +17,7 @@ type MockAWSManager struct {
 	pricing          *pricing.PricingManager
 	session          *session.Session
 	accountIdentity  *sts.GetCallerIdentityOutput
+	accountName      string
 	region           string
 	global           map[string]struct{}
 }
@@ -33,6 +34,7 @@ func AWSManager(collector collector.CollectorDescriber, cloudWatchClient *cloudw
 		cloudWatchClient: cloudWatchClient,
 		pricing:          priceClient,
 		accountIdentity:  accountIdentity,
+		accountName:      "test",
 		region:           region,
 		global:           make(map[string]struct{}),
 	}
@@ -56,6 +58,10 @@ func (dm *MockAWSManager) GetPricingClient() *pricing.PricingManager {
 
 func (dm *MockAWSManager) GetRegion() string {
 	return dm.region
+}
+
+func (dm *MockAWSManager) GetAccountName() string {
+	return dm.accountName
 }
 
 func (dm *MockAWSManager) GetSession() (*session.Session, *aws.Config) {

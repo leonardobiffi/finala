@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"finala/api/httpparameters"
 	"finala/api/storage"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -22,6 +22,7 @@ const (
 // DetectEventsInfo descrive the incoming HTTP events
 type DetectEventsInfo struct {
 	ResourceName string
+	AccountName  string
 	EventType    string
 	EventTime    int64
 	Data         interface{}
@@ -129,7 +130,7 @@ func (server *Server) DetectEvents(resp http.ResponseWriter, req *http.Request) 
 	params := mux.Vars(req)
 	executionID := params["executionID"]
 
-	buf, bodyErr := ioutil.ReadAll(req.Body)
+	buf, bodyErr := io.ReadAll(req.Body)
 
 	if bodyErr != nil {
 		server.JSONWrite(resp, http.StatusBadRequest, HttpErrorResponse{Error: bodyErr.Error()})
@@ -164,15 +165,14 @@ func (server *Server) DetectEvents(resp http.ResponseWriter, req *http.Request) 
 	}()
 
 	server.JSONWrite(resp, http.StatusAccepted, nil)
-
 }
 
-//NotFoundRoute return when route not found
+// NotFoundRoute return when route not found
 func (server *Server) NotFoundRoute(resp http.ResponseWriter, req *http.Request) {
 	server.JSONWrite(resp, http.StatusNotFound, HttpErrorResponse{Error: "Path not found"})
 }
 
-//HealthCheckHandler return ok if server is up
+// HealthCheckHandler return ok if server is up
 func (server *Server) HealthCheckHandler(resp http.ResponseWriter, req *http.Request) {
 	server.JSONWrite(resp, http.StatusOK, HealthResponse{Status: true})
 }

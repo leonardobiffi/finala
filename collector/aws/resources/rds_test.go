@@ -5,7 +5,6 @@ import (
 	awsTestutils "finala/collector/aws/testutils"
 	"finala/collector/config"
 	"finala/collector/testutils"
-	collectorTestutils "finala/collector/testutils"
 	"fmt"
 	"reflect"
 	"testing"
@@ -88,7 +87,7 @@ func (r *MockAWSRDSClient) ListTagsForResource(*rds.ListTagsForResourceInput) (*
 }
 
 func RDSManagerMock() (*RDSManager, error) {
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	mockClient := MockAWSRDSClient{
@@ -109,7 +108,7 @@ func RDSManagerMock() (*RDSManager, error) {
 }
 func TestDescribeRDSInstances(t *testing.T) {
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	t.Run("valid", func(t *testing.T) {
@@ -179,7 +178,7 @@ func TestDetectRDS(t *testing.T) {
 		},
 	}
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 	mockPrice := awsTestutils.NewMockPricing(nil)
 	detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")

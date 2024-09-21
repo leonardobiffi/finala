@@ -4,13 +4,11 @@ import (
 	"errors"
 	awsTestutils "finala/collector/aws/testutils"
 	"finala/collector/testutils"
-	collectorTestutils "finala/collector/testutils"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	awsClient "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/aws/aws-sdk-go/service/docdb"
 )
@@ -18,18 +16,18 @@ import (
 var defaultDocdbMock = docdb.DescribeDBInstancesOutput{
 	DBInstances: []*docdb.DBInstance{
 		{
-			DBInstanceArn:        awsClient.String("ARN::1"),
-			DBInstanceIdentifier: awsClient.String("id-1"),
-			DBInstanceClass:      awsClient.String("DBInstanceClass"),
-			Engine:               awsClient.String("docdb"),
-			InstanceCreateTime:   collectorTestutils.TimePointer(time.Now()),
+			DBInstanceArn:        aws.String("ARN::1"),
+			DBInstanceIdentifier: aws.String("id-1"),
+			DBInstanceClass:      aws.String("DBInstanceClass"),
+			Engine:               aws.String("docdb"),
+			InstanceCreateTime:   testutils.TimePointer(time.Now()),
 		},
 		{
-			DBInstanceArn:        awsClient.String("ARN::2"),
-			DBInstanceIdentifier: awsClient.String("id-2"),
-			DBInstanceClass:      awsClient.String("DBInstanceClass"),
-			Engine:               awsClient.String("docdb"),
-			InstanceCreateTime:   collectorTestutils.TimePointer(time.Now()),
+			DBInstanceArn:        aws.String("ARN::2"),
+			DBInstanceIdentifier: aws.String("id-2"),
+			DBInstanceClass:      aws.String("DBInstanceClass"),
+			Engine:               aws.String("docdb"),
+			InstanceCreateTime:   testutils.TimePointer(time.Now()),
 		},
 	},
 }
@@ -52,7 +50,7 @@ func (r *MockAWSDocdbClient) ListTagsForResource(*docdb.ListTagsForResourceInput
 
 func TestNewDocDBManager(t *testing.T) {
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	mockClient := MockEmptyClient{}
@@ -68,7 +66,7 @@ func TestNewDocDBManager(t *testing.T) {
 }
 func TestDescribeDocdb(t *testing.T) {
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	t.Run("valid", func(t *testing.T) {
@@ -134,7 +132,7 @@ func TestDescribeDocdb(t *testing.T) {
 func TestDetectDocdb(t *testing.T) {
 
 	t.Run("detect documents db", func(t *testing.T) {
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -174,7 +172,7 @@ func TestDetectDocdb(t *testing.T) {
 	})
 
 	t.Run("detection error", func(t *testing.T) {
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -203,7 +201,7 @@ func TestDetectDocdb(t *testing.T) {
 			"invalid_metric": {},
 		}
 
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(&cloudWatchMetrics)
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -244,7 +242,7 @@ func TestDetectEventData(t *testing.T) {
 		},
 	}
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	mockCloudwatch := awsTestutils.NewMockCloudwatch(&cloudWatchMetrics)
 	mockPrice := awsTestutils.NewMockPricing(nil)
 	detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")

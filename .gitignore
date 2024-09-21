@@ -6,6 +6,11 @@ config_test.yaml
 cov.txt
 .vscode
 
+# Terraform
+.terraform
+*.tfstate*
+deploy
+
 # Golang
 # Binaries for programs and plugins
 *.exe

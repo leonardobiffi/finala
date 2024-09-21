@@ -1,14 +1,11 @@
 package cmd
 
 import (
-	"context"
 	"finala/collector"
 	"finala/collector/aws"
 	"finala/collector/config"
-	"finala/request"
 	"finala/visibility"
 	"os"
-	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -20,10 +17,6 @@ var collectorCMD = &cobra.Command{
 	Short: "Collects and analyzes resources from given configuration",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		var wg sync.WaitGroup
-		ctx, cancelFn := context.WithCancel(context.Background())
-
 		// Loading configuration file
 		configStruct, err := config.Load(cfgFile)
 		if err != nil {
@@ -38,25 +31,17 @@ var collectorCMD = &cobra.Command{
 			log.Error("Providers not found")
 		}
 
-		// Create HTTP client request
-		req := request.NewHTTPClient()
-
-		// Init collector manager
-		collectorManager := collector.NewCollectorManager(ctx, &wg, req, configStruct.APIServer.BulkInterval, configStruct.Name, configStruct.APIServer.Addr)
-
 		// Starting collect data
 		awsProvider := configStruct.Providers["aws"]
 
 		// init metric manager
 		metricManager := collector.NewMetricManager(awsProvider)
 
-		awsManager := aws.NewAnalyzeManager(collectorManager, metricManager, awsProvider.Accounts)
-
+		// init and run aws analyze manager
+		awsManager := aws.NewAnalyzeManager(configStruct, metricManager, awsProvider.Accounts)
 		awsManager.All()
 
 		log.Info("Collector Done. Starting graceful shutdown")
-		cancelFn()
-		wg.Wait()
 	},
 }
 

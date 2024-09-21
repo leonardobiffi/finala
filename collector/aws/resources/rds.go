@@ -18,7 +18,7 @@ import (
 )
 
 // ErrRDSStorageTypeNotFound will be used when a storage type is not found
-var ErrRDSStorageTypeNotFound = errors.New("Could not find RDS storage type")
+var ErrRDSStorageTypeNotFound = errors.New("could not find RDS storage type")
 
 // RDSClientDescreptor is an interface defining the aws rds client
 type RDSClientDescreptor interface {
@@ -26,7 +26,7 @@ type RDSClientDescreptor interface {
 	ListTagsForResource(*rds.ListTagsForResourceInput) (*rds.ListTagsForResourceOutput, error)
 }
 
-//RDSManager describe RDS struct
+// RDSManager describe RDS struct
 type RDSManager struct {
 	client             RDSClientDescreptor
 	awsManager         common.AWSManager
@@ -48,6 +48,7 @@ type DetectedAWSRDS struct {
 // RDSVolumeType will hold the available volume types for RDS types
 var rdsStorageType = map[string]string{
 	"gp2":      "General Purpose",
+	"gp3":      "General Purpose-GP3",
 	"standard": "Magnetic",
 	"io1":      "Provisioned IOPS",
 	"aurora":   "General Purpose-Aurora",
@@ -59,7 +60,6 @@ func init() {
 
 // NewRDSManager implements AWS GO SDK
 func NewRDSManager(awsManager common.AWSManager, client interface{}) (common.ResourceDetection, error) {
-
 	if client == nil {
 		client = rds.New(awsManager.GetSession())
 	}
@@ -80,7 +80,6 @@ func NewRDSManager(awsManager common.AWSManager, client interface{}) (common.Res
 
 // Detect check with RDS is under utilization
 func (r *RDSManager) Detect(metrics []config.MetricConfig) (interface{}, error) {
-
 	log.WithFields(log.Fields{
 		"region":   r.awsManager.GetRegion(),
 		"resource": "rds",
@@ -234,7 +233,8 @@ func (r *RDSManager) getHourlyStoragePrice(instance *rds.DBInstance, pricingRegi
 			storagePricingFilters = r.getPricingAuroraStorageFilterInput(rdsStorageType, pricingRegionPrefix)
 		default:
 			deploymentOption := r.getPricingDeploymentOption(instance)
-			storagePricingFilters = r.getPricingRDSStorageFilterInput(rdsStorageType, deploymentOption)
+			databaseEngine := r.getPricingDatabaseEngine(instance)
+			storagePricingFilters = r.getPricingRDSStorageFilterInput(rdsStorageType, deploymentOption, databaseEngine)
 		}
 
 		log.WithField("storage_filters", storagePricingFilters).Debug("pricing storage filters")
@@ -254,11 +254,10 @@ func (r *RDSManager) getHourlyStoragePrice(instance *rds.DBInstance, pricingRegi
 
 // getPricingFilterInput prepare document rds pricing filter
 func (r *RDSManager) getPricingInstanceFilterInput(instance *rds.DBInstance) pricing.GetProductsInput {
-
 	databaseEngine := r.getPricingDatabaseEngine(instance)
 	deploymentOption := r.getPricingDeploymentOption(instance)
 
-	return pricing.GetProductsInput{
+	input := pricing.GetProductsInput{
 		ServiceCode: &r.servicePricingCode,
 		Filters: []*pricing.Filter{
 			{
@@ -278,6 +277,17 @@ func (r *RDSManager) getPricingInstanceFilterInput(instance *rds.DBInstance) pri
 			},
 		},
 	}
+
+	if databaseEngine == "Aurora MySQL" || databaseEngine == "Aurora PostgreSQL" {
+		storageType := r.getStorageType(instance)
+		input.Filters = append(input.Filters, &pricing.Filter{
+			Type:  awsClient.String("TERM_MATCH"),
+			Field: awsClient.String("storage"),
+			Value: awsClient.String(storageType),
+		})
+	}
+
+	return input
 }
 
 // getPricingDatabaseEngine will return the pricing Database Engine according to the RDS instance engine.
@@ -307,9 +317,27 @@ func (r *RDSManager) getPricingDeploymentOption(instance *rds.DBInstance) string
 	return deploymentOption
 }
 
-// getPricingRDSStorageFilterInput will set the right filters for RDS Storage pricing
-func (r *RDSManager) getPricingRDSStorageFilterInput(rdsStorageType string, deploymentOption string) pricing.GetProductsInput {
+func (r *RDSManager) getStorageType(instance *rds.DBInstance) string {
+	var storageType string
 
+	types := make(map[string][]string)
+	types["Aurora IO Optimization Mode"] = []string{"aurora-iopt1"}
+	types["EBS Only"] = []string{"aurora"}
+
+	for i, t := range types {
+		for _, s := range t {
+			if *instance.StorageType == s {
+				storageType = i
+				break
+			}
+		}
+	}
+
+	return storageType
+}
+
+// getPricingRDSStorageFilterInput will set the right filters for RDS Storage pricing
+func (r *RDSManager) getPricingRDSStorageFilterInput(rdsStorageType string, deploymentOption, databaseEngine string) pricing.GetProductsInput {
 	return pricing.GetProductsInput{
 		ServiceCode: &r.servicePricingCode,
 		Filters: []*pricing.Filter{
@@ -317,6 +345,11 @@ func (r *RDSManager) getPricingRDSStorageFilterInput(rdsStorageType string, depl
 				Type:  awsClient.String("TERM_MATCH"),
 				Field: awsClient.String("volumeType"),
 				Value: awsClient.String(rdsStorageType),
+			},
+			{
+				Type:  awsClient.String("TERM_MATCH"),
+				Field: awsClient.String("databaseEngine"),
+				Value: awsClient.String(databaseEngine),
 			},
 			{
 				Type:  awsClient.String("TERM_MATCH"),
@@ -339,7 +372,6 @@ func (r *RDSManager) getPricingRDSStorageFilterInput(rdsStorageType string, depl
 
 // getPricingAuroraStorageFilterInput will set the right filters for Aurora Storage
 func (r *RDSManager) getPricingAuroraStorageFilterInput(rdsStorageType string, pricingRegionPrefix string) pricing.GetProductsInput {
-
 	return pricing.GetProductsInput{
 		ServiceCode: &r.servicePricingCode,
 		Filters: []*pricing.Filter{
@@ -364,7 +396,6 @@ func (r *RDSManager) getPricingAuroraStorageFilterInput(rdsStorageType string, p
 
 // describeInstances return list of rds instances
 func (r *RDSManager) describeInstances(Marker *string, instances []*rds.DBInstance) ([]*rds.DBInstance, error) {
-
 	input := &rds.DescribeDBInstancesInput{
 		Marker:  Marker,
 		Filters: []*rds.Filter{},

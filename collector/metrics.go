@@ -22,7 +22,6 @@ type MetricManager struct {
 
 // NewMetricManager implements metric manager logic
 func NewMetricManager(metrics config.ProviderConfig) *MetricManager {
-
 	return &MetricManager{
 		metrics: metrics.Metrics,
 	}
@@ -30,7 +29,6 @@ func NewMetricManager(metrics config.ProviderConfig) *MetricManager {
 
 // IsResourceMetricsEnable checks if the resource metrics configure and and at least one of the metric is enabled
 func (mm *MetricManager) IsResourceMetricsEnable(resourceType string) ([]config.MetricConfig, error) {
-
 	metricsResponse := []config.MetricConfig{}
 	logger := log.WithField("resource_type", resourceType)
 	metrics, found := mm.metrics[resourceType]

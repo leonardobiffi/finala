@@ -22,7 +22,6 @@ type Auth struct {
 
 // NewAuth creates new Finala aws authenticator
 func NewAuth(account config.AWSAccount) *Auth {
-
 	return &Auth{
 		account: account,
 	}
@@ -35,7 +34,6 @@ func NewAuth(account config.AWSAccount) *Auth {
 // 3. checks if role exists in yaml file
 // else login without any specific creds and give aws logic. for more details: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html
 func (au *Auth) Login(region string) (*session.Session, *awsClient.Config) {
-
 	if au.account.AccessKey != "" && au.account.SecretKey != "" {
 		return au.withStaticCredentials(au.account.AccessKey, au.account.SecretKey, au.account.SessionToken, region)
 	} else if au.account.Profile != "" {
@@ -55,7 +53,6 @@ func (au *Auth) Login(region string) (*session.Session, *awsClient.Config) {
 
 // withStaticCredentials login with static credentials
 func (au *Auth) withStaticCredentials(accessKey, secretKey, sessionToken, region string) (*session.Session, *awsClient.Config) {
-
 	log.WithField("region", region).Info("auth: using aws static credentials")
 
 	config := &awsClient.Config{
@@ -68,7 +65,6 @@ func (au *Auth) withStaticCredentials(accessKey, secretKey, sessionToken, region
 
 // withProfile login with profile
 func (au *Auth) withProfile(profile, region string) (*session.Session, *awsClient.Config) {
-
 	log.WithField("region", region).Info("auth: using aws profile")
 
 	// If empty will look for "AWS_SHARED_CREDENTIALS_FILE" env variable. If the
@@ -87,7 +83,6 @@ func (au *Auth) withProfile(profile, region string) (*session.Session, *awsClien
 
 // withRole login with role
 func (au *Auth) withRole(role, region string) (*session.Session, *awsClient.Config) {
-
 	log.WithField("region", region).Info("auth: using aws role")
 	config := &awsClient.Config{
 		Region: &region,

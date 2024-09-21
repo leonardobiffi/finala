@@ -4,7 +4,6 @@ import (
 	"errors"
 	awsTestutils "finala/collector/aws/testutils"
 	"finala/collector/testutils"
-	collectorTestutils "finala/collector/testutils"
 	"reflect"
 	"testing"
 	"time"
@@ -18,7 +17,7 @@ var defaultNATGatewaybMock = ec2.DescribeNatGatewaysOutput{
 	NatGateways: []*ec2.NatGateway{
 		{
 			NatGatewayId: awsClient.String("ARN::1"),
-			CreateTime:   collectorTestutils.TimePointer(time.Now()),
+			CreateTime:   testutils.TimePointer(time.Now()),
 			SubnetId:     awsClient.String("id-1"),
 			VpcId:        awsClient.String("vpc-1"),
 			Tags: []*ec2.Tag{
@@ -34,7 +33,7 @@ var defaultNATGatewaybMock = ec2.DescribeNatGatewaysOutput{
 		},
 		{
 			NatGatewayId: awsClient.String("ARN::2"),
-			CreateTime:   collectorTestutils.TimePointer(time.Now()),
+			CreateTime:   testutils.TimePointer(time.Now()),
 			SubnetId:     awsClient.String("id-2"),
 			VpcId:        awsClient.String("vpc-2"),
 			Tags: []*ec2.Tag{
@@ -64,7 +63,7 @@ func (r *MockAWSNATGatewayClient) DescribeNatGateways(*ec2.DescribeNatGatewaysIn
 
 func TestNewNATGatewayManager(t *testing.T) {
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	mockClient := MockEmptyNATGatewayClient{}
@@ -80,7 +79,7 @@ func TestNewNATGatewayManager(t *testing.T) {
 
 func TestDescribe(t *testing.T) {
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	t.Run("valid", func(t *testing.T) {
@@ -144,7 +143,7 @@ func TestDescribe(t *testing.T) {
 func TestDetectNATGateway(t *testing.T) {
 
 	t.Run("detect NAT gateways", func(t *testing.T) {
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -183,7 +182,7 @@ func TestDetectNATGateway(t *testing.T) {
 	})
 
 	t.Run("detection error", func(t *testing.T) {
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -212,7 +211,7 @@ func TestDetectNATGateway(t *testing.T) {
 			"invalid_metric": {},
 		}
 
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(&cloudWatchMetrics)
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -252,7 +251,7 @@ func TestDetectNATGatewyEventData(t *testing.T) {
 		},
 	}
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	mockCloudwatch := awsTestutils.NewMockCloudwatch(&cloudWatchMetrics)
 	mockPrice := awsTestutils.NewMockPricing(nil)
 	detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")

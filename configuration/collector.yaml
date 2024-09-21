@@ -7,10 +7,10 @@ api_server:
 
 providers:
   aws:
-    accounts: 
-      - name: <account_name>
-        # access_key: <access_key>
-        # secret_key: <secret_key>
+    accounts:
+      - name: prd-sharedservices-4all
+        # access_key: 
+        # secret_key: 
         # profile: 
         # role: 
         regions:

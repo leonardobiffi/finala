@@ -1,7 +1,9 @@
 package testutils
 
 import (
+	"context"
 	"finala/collector"
+	"sync"
 )
 
 type MockCollector struct {
@@ -10,7 +12,6 @@ type MockCollector struct {
 }
 
 func NewMockCollector() *MockCollector {
-
 	return &MockCollector{}
 }
 
@@ -21,6 +22,10 @@ func (mc *MockCollector) AddResource(data collector.EventCollector) {
 func (mc *MockCollector) GetCollectorEvent() []collector.EventCollector {
 	events := []collector.EventCollector{}
 	return events
+}
+
+func (mc *MockCollector) Start(ctx context.Context, wg *sync.WaitGroup, executionID string) {
+	// do nothing
 }
 
 func (mc *MockCollector) CollectStart(resourceName collector.ResourceIdentifier) {

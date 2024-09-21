@@ -5,7 +5,6 @@ import (
 	awsTestutils "finala/collector/aws/testutils"
 	"finala/collector/config"
 	"finala/collector/testutils"
-	collectorTestutils "finala/collector/testutils"
 	"reflect"
 	"testing"
 	"time"
@@ -42,7 +41,7 @@ func (np *MockAWSNeptuneClient) ListTagsForResource(*neptune.ListTagsForResource
 
 func TestDescribeNeptune(t *testing.T) {
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	t.Run("valid", func(t *testing.T) {
@@ -114,7 +113,7 @@ func TestDetectNeptune(t *testing.T) {
 		},
 	}
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 	mockPrice := awsTestutils.NewMockPricing(nil)
 	detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -173,7 +172,7 @@ func TestDetectNeptuneError(t *testing.T) {
 		},
 	}
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 	mockPrice := awsTestutils.NewMockPricing(nil)
 	detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")

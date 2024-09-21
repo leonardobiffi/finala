@@ -5,7 +5,6 @@ import (
 	awsTestutils "finala/collector/aws/testutils"
 	"finala/collector/config"
 	"finala/collector/testutils"
-	collectorTestutils "finala/collector/testutils"
 	"reflect"
 	"testing"
 	"time"
@@ -48,7 +47,7 @@ func (mg *mockAPIGatewayCLient) GetRestApis(input *apigateway.GetRestApisInput) 
 
 func TestNewAPIGatewayManager(t *testing.T) {
 
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 
 	t.Run("valid", func(t *testing.T) {
@@ -86,7 +85,7 @@ func TestGetRestApis(t *testing.T) {
 		mockClient := mockAPIGatewayCLient{
 			response: mockApiGatways,
 		}
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 		apigateway, err := NewAPIGatewayManager(detector, &mockClient)
 		if err != nil {
@@ -113,7 +112,7 @@ func TestGetRestApis(t *testing.T) {
 		mockClient := mockAPIGatewayCLient{
 			errResponse: errors.New("error message"),
 		}
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		detector := awsTestutils.AWSManager(collector, nil, nil, "us-east-1")
 		apigateway, err := NewAPIGatewayManager(detector, &mockClient)
 		if err != nil {
@@ -144,7 +143,7 @@ func TestDetect(t *testing.T) {
 	mockClient := mockAPIGatewayCLient{
 		response: mockApiGatways,
 	}
-	collector := collectorTestutils.NewMockCollector()
+	collector := testutils.NewMockCollector()
 	mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 	mockPrice := awsTestutils.NewMockPricing(nil)
 	detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -203,7 +202,7 @@ func TestDetectErrors(t *testing.T) {
 		mockClient := mockAPIGatewayCLient{
 			errResponse: errors.New("error message"),
 		}
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(nil)
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")
@@ -226,7 +225,7 @@ func TestDetectErrors(t *testing.T) {
 		mockClient := mockAPIGatewayCLient{
 			response: mockApiGatways,
 		}
-		collector := collectorTestutils.NewMockCollector()
+		collector := testutils.NewMockCollector()
 		mockCloudwatch := awsTestutils.NewMockCloudwatch(&map[string]cloudwatch.GetMetricStatisticsOutput{})
 		mockPrice := awsTestutils.NewMockPricing(nil)
 		detector := awsTestutils.AWSManager(collector, mockCloudwatch, mockPrice, "us-east-1")

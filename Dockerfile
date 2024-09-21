@@ -1,6 +1,6 @@
 FROM node:12.16-alpine AS build_ui
 
-RUN apk add --update alpine-sdk make 
+RUN apk add --update alpine-sdk make python
 
 WORKDIR /app
 

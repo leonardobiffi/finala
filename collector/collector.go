@@ -44,7 +44,6 @@ type CollectorManager struct {
 
 // NewCollectorManager create new collector instance
 func NewCollectorManager(ctx context.Context, wg *sync.WaitGroup, req *request.HTTPClient, sendInterval time.Duration, name, apiEndpoint string) *CollectorManager {
-
 	wg.Add(2)
 	executionID := fmt.Sprintf("%s_%v", name, time.Now().Unix())
 	log.WithField("id", executionID).Info("generate collector execution id")
