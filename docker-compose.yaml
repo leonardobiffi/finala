@@ -6,7 +6,8 @@ services:
     environment:
       discovery.type: "single-node"
       xpack.security.enabled: "false"
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      cluster.routing.allocation.disk.threshold_enabled: "false"
+      ES_JAVA_OPTS: "-Xms1024m -Xmx1024m"
     deploy:
       resources:
         limits: 
@@ -21,7 +22,7 @@ services:
       timeout: 10s
       retries: 120
     volumes:
-      - ./.cache/esdata:/usr/share/elasticsearch/data
+      - esdata:/usr/share/elasticsearch/data
   
   # kibana:
   #   image: docker.elastic.co/kibana/kibana:8.9.0
@@ -65,23 +66,6 @@ services:
     depends_on:
       - elasticsearch
   
-  collector:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    command:
-      - collector 
-      - -c 
-      - /etc/finala/config.yaml
-    environment:
-      - OVERRIDE_API_ENDPOINT=http://api:8081
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    volumes:
-        - ./configuration/collector.yaml:/etc/finala/config.yaml
-    depends_on:
-      - api
-  
   # Uncomment the notifier after a first successful run of the Collector
   # notifier:
   #     build:
@@ -95,3 +79,6 @@ services:
   #         - ./configuration/notifier.yaml:/etc/finala/config.yaml
   #     depends_on: 
   #       - api
+
+volumes:
+  esdata:
