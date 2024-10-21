@@ -8,14 +8,14 @@ api_server:
 providers:
   aws:
     accounts:
-      - name: prd-sharedservices-4all
+      - name: default
         # access_key: 
         # secret_key: 
         # profile: 
         # role: 
         regions:
           - us-east-1
-          - us-west-2
+          - us-east-2
     metrics:
       rds:
         - description: Connection count
